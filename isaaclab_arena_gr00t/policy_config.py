@@ -12,6 +12,7 @@ from pathlib import Path
 class TaskMode(Enum):
     G1_LOCOMANIPULATION = "g1_locomanipulation"
     GR1_TABLETOP_MANIPULATION = "gr1_tabletop_manipulation"
+    G1_FIXED_BASE_MANIPULATION = "g1_fixed_base_manipulation"
 
 
 @dataclass
@@ -86,6 +87,10 @@ class LerobotReplayActionPolicyConfig:
             assert (
                 self.embodiment_tag == "gr1"
             ), "embodiment_tag must be gr1 for GR1 tabletop manipulation. Is {self.embodiment_tag}"
+        elif self.task_mode_name == TaskMode.G1_FIXED_BASE_MANIPULATION.value:
+            assert (
+                self.embodiment_tag == "new_embodiment"
+            ), "embodiment_tag must be new_embodiment for G1 fixed base manipulation"
         else:
             raise ValueError(f"Invalid inference mode: {self.task_mode}")
 
@@ -191,5 +196,9 @@ class Gr00tClosedloopPolicyConfig:
             ), "embodiment_tag must be new_embodiment for G1 locomanipulation"
         elif self.task_mode_name == TaskMode.GR1_TABLETOP_MANIPULATION.value:
             assert self.embodiment_tag == "gr1", "embodiment_tag must be gr1 for GR1 tabletop manipulation"
+        elif self.task_mode_name == TaskMode.G1_FIXED_BASE_MANIPULATION.value:
+            assert (
+                self.embodiment_tag == "new_embodiment"
+            ), "embodiment_tag must be new_embodiment for G1 fixed base manipulation"
         else:
             raise ValueError(f"Invalid inference mode: {self.task_mode}")

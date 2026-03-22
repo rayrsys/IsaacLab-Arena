@@ -24,10 +24,12 @@ def remap_sim_joints_to_policy_joints(
             if joint_name in sim_joints_state.joints_order_config:
                 joint_index = sim_joints_state.joints_order_config[joint_name]
                 data[group].append(sim_joints_state.joints_pos[:, joint_index])
-            else:
-                raise ValueError(f"Joint {joint_name} not found in {sim_joints_state.joints_order_config}")
 
-        data[group] = np.stack(data[group], axis=1)
+        if data[group]:
+            data[group] = np.stack(data[group], axis=1)
+        else:
+            # No matching joints found for this group — will be zero-filled later
+            del data[group]
     return data
 
 

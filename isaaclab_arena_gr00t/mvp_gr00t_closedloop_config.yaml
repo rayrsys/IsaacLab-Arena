@@ -3,21 +3,31 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# This file shows how to configure the Gr00tClosedloopPolicy class for G1 locomanipulation task
-# NOTE(alexmillane, 2025-10-31): The model path here aligns with the model used in the static manipulation tutorial.
-model_path: /home/ray/models/checkpoint-20000
+# MVP GR00T Closedloop Policy Configuration
+# This is a separate config from g1_locomanip_gr00t_closedloop_config.yaml to avoid breaking existing setups
+#
+# USAGE: After training, update model_path to point to your trained checkpoint
+# Example: /home/ray/models/mvp_checkpoint/checkpoint-5000
+
+# Path to your fine-tuned model checkpoint
+# NOTE: Update this after Phase 3 training completes!
+model_path: /home/ray/models/mvp_checkpoint/checkpoint-5000
+
+# Language instruction - can be modified to test generalization
 language_instruction: "Pick up the brown box from the shelf, and place it into the blue bin on the table located at the right of the shelf."
-# Action horizon is the number of actions predicted by the policy per inference rollout, defined in the GN1.5 policy data_config 'unitree_g1_sim_wbc'.
+
+# Action horizon is the number of actions predicted by the policy per inference rollout
 action_horizon: 16
 embodiment_tag: new_embodiment
 video_backend: decord
 data_config: unitree_g1_sim_wbc
 
+# Joint configuration paths (reuse existing G1 configs)
 policy_joints_config_path: isaaclab_arena_gr00t/config/g1/gr00t_43dof_joint_space.yaml
 action_joints_config_path: isaaclab_arena_gr00t/config/g1/43dof_joint_space.yaml
 state_joints_config_path: isaaclab_arena_gr00t/config/g1/43dof_joint_space.yaml
 
-# Action chunk length is the number of actions executed per inference rollout, could be less than action_horizon.
+# Action chunk length is the number of actions executed per inference rollout
 action_chunk_length: 16
 pov_cam_name_sim: "robot_head_cam_rgb"
 

@@ -1,0 +1,58 @@
+# Gr00t dataset config for G1 simple pick and place task
+
+# Root directory for all data storage
+data_root: "/home/ray/datasets/simple_pick_and_place"
+
+# Instruction given to the policy in natural language
+language_instruction: "Pick up the brown box and place it on the green target square."
+task_index: 0
+
+# Name of the HDF5 file to use for the dataset
+hdf5_name: "simple_pick_and_place_demos.hdf5"
+
+# HDF5 datafield names
+state_name_sim: "robot_joint_pos"
+left_eef_pos_name_sim: "left_eef_pos"
+left_eef_quat_name_sim: "left_eef_quat"
+right_eef_pos_name_sim: "right_eef_pos"
+right_eef_quat_name_sim: "right_eef_quat"
+action_name_sim: "processed_actions"
+pov_cam_name_sim: "robot_head_cam_rgb"
+
+# Gr00t-LeRobot datafield names
+state_name_lerobot: "observation.state"
+action_name_lerobot: "action"
+action_eef_name_sim: "action.eef"
+video_name_lerobot: "observation.images.ego_view"
+task_description_lerobot: "annotation.human.task_description"
+
+# Parquet configuration
+chunks_size: 1000
+
+# Video configuration
+fps: 50
+
+# File path templates
+data_path: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet"
+video_path: "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4"
+
+# Configuration file paths
+modality_template_path: "isaaclab_arena_gr00t/config/g1/modality.json"
+modality_fname: "modality.json"
+episodes_fname: "episodes.jsonl"
+tasks_fname: "tasks.jsonl"
+info_template_path: "isaaclab_arena_gr00t/config/g1/info.json"
+info_fname: "info.json"
+
+# policy specific parameters (gr00t demonstration data stored in lerobot format)
+policy_joints_config_path: "isaaclab_arena_gr00t/config/g1/gr00t_43dof_joint_space.yaml"
+robot_type: "unitree_g1"
+
+# Robot simulation specific parameters
+action_joints_config_path: "isaaclab_arena_gr00t/config/g1/31dof_upper_body_joint_space.yaml"
+# Note: actions are 31D (upper body only from PINK IK), converter zero-fills missing leg joints to 43D
+state_joints_config_path: "isaaclab_arena_gr00t/config/g1/43dof_joint_space.yaml"
+
+# Image configuration (height, width, channels)
+original_image_size: [480, 640, 3]
+target_image_size: [480, 640, 3]

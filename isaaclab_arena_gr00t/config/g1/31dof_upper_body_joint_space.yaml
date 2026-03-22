@@ -1,0 +1,38 @@
+# 31-DOF action space for PINK IK upper body control
+# 17 PINK-controlled joints (arms + waist) + 14 hand joints
+# Joint order matches processed_actions output from PinkInverseKinematicsActionCfg
+
+joints:
+  "left_shoulder_pitch_joint": 0
+  "left_shoulder_roll_joint": 1
+  "left_shoulder_yaw_joint": 2
+  "left_elbow_joint": 3
+  "left_wrist_roll_joint": 4
+  "left_wrist_pitch_joint": 5
+  "left_wrist_yaw_joint": 6
+  "right_shoulder_pitch_joint": 7
+  "right_shoulder_roll_joint": 8
+  "right_shoulder_yaw_joint": 9
+  "right_elbow_joint": 10
+  "right_wrist_roll_joint": 11
+  "right_wrist_pitch_joint": 12
+  "right_wrist_yaw_joint": 13
+  "waist_yaw_joint": 14
+  "waist_roll_joint": 15
+  "waist_pitch_joint": 16
+  "left_hand_index_0_joint": 17
+  "left_hand_middle_0_joint": 18
+  "left_hand_thumb_0_joint": 19
+  "right_hand_index_0_joint": 20
+  "right_hand_middle_0_joint": 21
+  "right_hand_thumb_0_joint": 22
+  "left_hand_index_1_joint": 23
+  "left_hand_middle_1_joint": 24
+  "left_hand_thumb_1_joint": 25
+  "right_hand_index_1_joint": 26
+  "right_hand_middle_1_joint": 27
+  "right_hand_thumb_1_joint": 28
+  "left_hand_thumb_2_joint": 29
+  "right_hand_thumb_2_joint": 30
+
+total_joints: 31

@@ -7,6 +7,7 @@ from isaaclab.utils.assets import ISAACLAB_NUCLEUS_DIR
 
 from isaaclab_arena.affordances.openable import Openable
 from isaaclab_arena.affordances.pressable import Pressable
+from isaaclab_arena.assets.asset import Asset
 from isaaclab_arena.assets.object import Object
 from isaaclab_arena.assets.object_base import ObjectType
 from isaaclab_arena.assets.register import register_asset
@@ -227,6 +228,133 @@ class BrownBox(LibraryObject):
     usd_path = f"{ISAACLAB_NUCLEUS_DIR}/Arena/assets/object_library/brown_box/brown_box.usd"
     default_prim_path = "{ENV_REGEX_NS}/brown_box"
     scale = (1.0, 1.0, 1.0)
+
+    def __init__(self, prim_path: str | None = None, initial_pose: Pose | None = None):
+        super().__init__(prim_path=prim_path, initial_pose=initial_pose)
+
+
+@register_asset
+class ChessPiece(Asset):
+    """A chess piece represented as a rigid cylinder primitive.
+
+    Cylinder dimensions: radius=0.015m (~30mm diameter), height=0.04m (~40mm tall).
+    """
+
+    name = "chess_piece"
+    tags = ["object"]
+
+    def __init__(self, prim_path: str | None = None, initial_pose: Pose | None = None):
+        super().__init__(name=self.name, tags=self.tags)
+        self.prim_path = prim_path or "{ENV_REGEX_NS}/chess_piece"
+        self.initial_pose = initial_pose
+        self.object_type = ObjectType.RIGID
+
+    def set_initial_pose(self, pose: Pose) -> None:
+        self.initial_pose = pose
+
+    def get_initial_pose(self) -> Pose | None:
+        return self.initial_pose
+
+    def is_initial_pose_set(self) -> bool:
+        return self.initial_pose is not None
+
+    def get_prim_path(self) -> str:
+        return self.prim_path
+
+    def get_object_cfg(self) -> dict:
+        from isaaclab.assets import RigidObjectCfg
+        from isaaclab.sim.schemas.schemas_cfg import CollisionPropertiesCfg, MassPropertiesCfg, RigidBodyPropertiesCfg
+        from isaaclab.sim.spawners.materials import PreviewSurfaceCfg
+        from isaaclab.sim.spawners.shapes import CylinderCfg
+
+        init_state = RigidObjectCfg.InitialStateCfg()
+        if self.initial_pose is not None:
+            init_state.pos = self.initial_pose.position_xyz
+            init_state.rot = self.initial_pose.rotation_wxyz
+
+        return {
+            self.name: RigidObjectCfg(
+                prim_path=self.prim_path,
+                spawn=CylinderCfg(
+                    radius=0.015,
+                    height=0.04,
+                    rigid_props=RigidBodyPropertiesCfg(disable_gravity=False),
+                    mass_props=MassPropertiesCfg(mass=0.05),
+                    collision_props=CollisionPropertiesCfg(),
+                    visual_material=PreviewSurfaceCfg(diffuse_color=(0.1, 0.1, 0.1)),
+                ),
+                init_state=init_state,
+            )
+        }
+
+
+@register_asset
+class ChessTargetSquare(Asset):
+    """A target square for chess piece placement. Kinematic (immovable) green marker."""
+
+    name = "chess_target_square"
+    tags = ["object"]
+
+    def __init__(self, prim_path: str | None = None, initial_pose: Pose | None = None):
+        super().__init__(name=self.name, tags=self.tags)
+        self.prim_path = prim_path or "{ENV_REGEX_NS}/chess_target_square"
+        self.initial_pose = initial_pose
+        self.object_type = ObjectType.RIGID
+
+    def set_initial_pose(self, pose: Pose) -> None:
+        self.initial_pose = pose
+
+    def get_initial_pose(self) -> Pose | None:
+        return self.initial_pose
+
+    def is_initial_pose_set(self) -> bool:
+        return self.initial_pose is not None
+
+    def get_prim_path(self) -> str:
+        return self.prim_path
+
+    def get_object_cfg(self) -> dict:
+        from isaaclab.assets import RigidObjectCfg
+        from isaaclab.sim.schemas.schemas_cfg import CollisionPropertiesCfg, RigidBodyPropertiesCfg
+        from isaaclab.sim.spawners.materials import PreviewSurfaceCfg
+        from isaaclab.sim.spawners.shapes import CuboidCfg
+
+        init_state = RigidObjectCfg.InitialStateCfg()
+        if self.initial_pose is not None:
+            init_state.pos = self.initial_pose.position_xyz
+            init_state.rot = self.initial_pose.rotation_wxyz
+
+        return {
+            self.name: RigidObjectCfg(
+                prim_path=self.prim_path,
+                spawn=CuboidCfg(
+                    size=(0.04, 0.04, 0.005),
+                    rigid_props=RigidBodyPropertiesCfg(
+                        disable_gravity=False,
+                        kinematic_enabled=True,
+                    ),
+                    collision_props=CollisionPropertiesCfg(),
+                    visual_material=PreviewSurfaceCfg(diffuse_color=(0.0, 0.8, 0.0)),
+                ),
+                init_state=init_state,
+            )
+        }
+
+
+@register_asset
+class ChessBoard(LibraryObject):
+    """
+    A chess board with pieces exported from Blender.
+    Visual only — the table underneath provides the collision surface for chess pieces.
+    """
+
+    name = "chess_board"
+    tags = ["object"]
+    object_type = ObjectType.BASE
+    usd_path = "/home/ray/chessboardandpieces/chessboard/quit.usdc"
+    default_prim_path = "{ENV_REGEX_NS}/chess_board"
+    # Blender model is ~2m across, scale to ~0.4m to fit on table
+    scale = (0.3, 0.3, 0.3)
 
     def __init__(self, prim_path: str | None = None, initial_pose: Pose | None = None):
         super().__init__(prim_path=prim_path, initial_pose=initial_pose)

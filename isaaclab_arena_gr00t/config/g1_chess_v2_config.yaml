@@ -1,0 +1,46 @@
+# Gr00tDatasetConfig for G1 chess — 36 teleop demos with camera
+
+data_root: "/home/ray/datasets/chess_v2"
+
+language_instruction: "Pick up the chess piece and place it on the green target square."
+task_index: 0
+
+hdf5_name: "chess_demos_v2_annotated.hdf5"
+
+# HDF5 datafield names
+state_name_sim: "robot_joint_pos"
+left_eef_pos_name_sim: "left_eef_pos"
+left_eef_quat_name_sim: "left_eef_quat"
+right_eef_pos_name_sim: "right_eef_pos"
+right_eef_quat_name_sim: "right_eef_quat"
+action_name_sim: "processed_actions"
+pov_cam_name_sim: "robot_head_cam_rgb"
+
+# Gr00t-LeRobot datafield names
+state_name_lerobot: "observation.state"
+action_name_lerobot: "action"
+action_eef_name_sim: "action.eef"
+video_name_lerobot: "observation.images.ego_view"
+task_description_lerobot: "annotation.human.task_description"
+
+chunks_size: 1000
+fps: 50
+
+data_path: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet"
+video_path: "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4"
+
+modality_template_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/modality_fixed_base.json"
+modality_fname: "modality.json"
+episodes_fname: "episodes.jsonl"
+tasks_fname: "tasks.jsonl"
+info_template_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/info.json"
+info_fname: "info.json"
+
+policy_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/gr00t_43dof_joint_space.yaml"
+robot_type: "unitree_g1"
+
+action_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/31dof_upper_body_joint_space.yaml"
+state_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/43dof_joint_space.yaml"
+
+original_image_size: [480, 640, 3]
+target_image_size: [480, 640, 3]

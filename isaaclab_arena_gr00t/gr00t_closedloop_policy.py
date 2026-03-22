@@ -87,6 +87,8 @@ class Gr00tClosedloopPolicy(PolicyBase):
             self.data_config = DATA_CONFIG_MAP[self.policy_config.data_config]
         elif self.policy_config.data_config == "unitree_g1_sim_wbc":
             self.data_config = load_data_config("isaaclab_arena_gr00t.data_config:UnitreeG1SimWBCDataConfig")
+        elif self.policy_config.data_config == "unitree_g1_fixed_base":
+            self.data_config = load_data_config("isaaclab_arena_gr00t.data_config:UnitreeG1FixedBaseDataConfig")
         else:
             raise ValueError(f"Invalid data config: {self.policy_config.data_config}")
 
@@ -132,7 +134,7 @@ class Gr00tClosedloopPolicy(PolicyBase):
             "state.right_hand": joint_pos_state_policy["right_hand"].reshape(self.num_envs, 1, -1),
         }
         # NOTE(xinjieyao, 2025-10-07): waist is not used in GR1 tabletop manipulation
-        if self.task_mode == TaskMode.G1_LOCOMANIPULATION:
+        if self.task_mode in (TaskMode.G1_LOCOMANIPULATION, TaskMode.G1_FIXED_BASE_MANIPULATION):
             policy_observations["state.waist"] = joint_pos_state_policy["waist"].reshape(self.num_envs, 1, -1)
         return policy_observations
 
@@ -210,7 +212,7 @@ class Gr00tClosedloopPolicy(PolicyBase):
                 ],
                 axis=2,
             )
-        elif self.task_mode == TaskMode.GR1_TABLETOP_MANIPULATION:
+        elif self.task_mode in (TaskMode.GR1_TABLETOP_MANIPULATION, TaskMode.G1_FIXED_BASE_MANIPULATION):
             action_tensor = robot_action_sim.get_joints_pos()
 
         assert action_tensor.shape[0] == self.num_envs and action_tensor.shape[1] >= self.action_chunk_length

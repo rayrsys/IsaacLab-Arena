@@ -28,7 +28,7 @@ class DummyTask(TaskBase):
         pass
 
     def get_metrics(self):
-        pass
+        return []
 
     def get_viewer_cfg(self) -> ViewerCfg:
         return ViewerCfg(eye=(-1.5, -1.5, 1.5), lookat=(0.0, 0.0, 0.5))

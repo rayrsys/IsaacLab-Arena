@@ -1,0 +1,23 @@
+# Copyright (c) 2025, The Isaac Lab Arena Project Developers (https://github.com/isaac-sim/IsaacLab-Arena/blob/main/CONTRIBUTORS.md).
+# All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# GR00T closed-loop policy config for G1 chess piece placement task
+model_path: /home/ray/models/chess-v3-100demos-merged
+language_instruction: "Pick up the chess piece and place it on the green target square."
+# Action horizon is the number of actions predicted by the policy per inference rollout
+action_horizon: 16
+embodiment_tag: new_embodiment
+video_backend: decord
+data_config: unitree_g1_fixed_base
+
+policy_joints_config_path: /home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/gr00t_43dof_joint_space.yaml
+action_joints_config_path: /home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/31dof_upper_body_joint_space.yaml
+state_joints_config_path: /home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/43dof_joint_space.yaml
+
+# Action chunk length is the number of actions executed per inference rollout
+action_chunk_length: 16
+pov_cam_name_sim: "robot_head_cam_rgb"
+
+task_mode_name: g1_fixed_base_manipulation

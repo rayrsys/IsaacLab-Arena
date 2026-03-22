@@ -31,6 +31,7 @@ from isaaclab_arena.utils.isaaclab_utils.resets import reset_all_articulation_jo
 from isaaclab_arena.utils.pose import Pose
 from isaaclab_arena_g1.g1_env.mdp import g1_events as g1_events_mdp
 from isaaclab_arena_g1.g1_env.mdp import g1_observations as g1_observations_mdp
+from isaaclab.envs.mdp.actions import JointPositionActionCfg
 from isaaclab_arena_g1.g1_env.mdp.actions.g1_decoupled_wbc_joint_action_cfg import G1DecoupledWBCJointActionCfg
 from isaaclab_arena_g1.g1_env.mdp.actions.g1_decoupled_wbc_pink_action_cfg import G1DecoupledWBCPinkActionCfg
 
@@ -111,6 +112,31 @@ class G1WBCPinkEmbodiment(G1EmbodimentBase):
         self.observation_config = G1WBCPinkObservationsCfg()
         self.event_config = G1WBCPinkEventCfg()
         # Create camera config with private attributes to avoid scene parser issues
+        self.camera_config._is_tiled_camera = use_tiled_camera
+        self.camera_config._camera_offset = camera_offset
+
+
+@register_asset
+class G1JointEmbodiment(G1EmbodimentBase):
+    """Embodiment for the G1 robot with direct joint position control (no WBC).
+
+    Suitable for GR00T closed-loop evaluation where the policy outputs absolute joint positions.
+    By default uses tiled camera for efficient parallel evaluation.
+    """
+
+    name = "g1_joint"
+
+    def __init__(
+        self,
+        enable_cameras: bool = False,
+        initial_pose: Pose | None = None,
+        camera_offset: Pose | None = _DEFAULT_G1_CAMERA_OFFSET,
+        use_tiled_camera: bool = True,
+    ):
+        super().__init__(enable_cameras, initial_pose)
+        self.action_config = G1JointPositionActionCfg()
+        self.observation_config = G1JointObservationsCfg()
+        self.event_config = G1JointEventCfg()
         self.camera_config._is_tiled_camera = use_tiled_camera
         self.camera_config._camera_offset = camera_offset
 
@@ -591,6 +617,61 @@ class G1WBCPinkActionCfg:
     """Action specifications for the MDP, for G1 WBC action."""
 
     g1_action: ActionTermCfg = G1DecoupledWBCPinkActionCfg(asset_name="robot", joint_names=[".*"])
+
+
+@configclass
+class G1JointPositionActionCfg:
+    """Direct joint position control for G1 — no WBC."""
+
+    joint_pos = JointPositionActionCfg(
+        asset_name="robot", joint_names=[".*"], scale=1.0, use_default_offset=False
+    )
+
+
+@configclass
+class G1JointObservationsCfg:
+    """Observations for direct joint control (no WBC obs group needed)."""
+
+    @configclass
+    class PolicyCfg(ObsGroup):
+        actions = ObsTerm(func=mdp.last_action)
+        robot_joint_pos = ObsTerm(
+            func=base_mdp.joint_pos,
+            params={"asset_cfg": SceneEntityCfg("robot")},
+        )
+        robot_joint_vel = ObsTerm(
+            func=base_mdp.joint_vel,
+            params={"asset_cfg": SceneEntityCfg("robot")},
+        )
+        right_wrist_pose_pelvis_frame = ObsTerm(
+            func=transforms_terms.transform_pose_from_world_to_target_frame,
+            params={
+                "asset_cfg": SceneEntityCfg("robot"),
+                "target_link_name": "right_wrist_yaw_link",
+                "target_frame_name": "pelvis",
+            },
+        )
+        left_wrist_pose_pelvis_frame = ObsTerm(
+            func=transforms_terms.transform_pose_from_world_to_target_frame,
+            params={
+                "asset_cfg": SceneEntityCfg("robot"),
+                "target_link_name": "left_wrist_yaw_link",
+                "target_frame_name": "pelvis",
+            },
+        )
+
+        def __post_init__(self):
+            self.enable_corruption = False
+            self.concatenate_terms = False
+
+    policy: PolicyCfg = PolicyCfg()
+
+
+@configclass
+class G1JointEventCfg:
+    """Events for direct joint control (no WBC reset needed)."""
+
+    reset_all = EventTerm(func=reset_all_articulation_joints, mode="reset")
 
 
 @configclass

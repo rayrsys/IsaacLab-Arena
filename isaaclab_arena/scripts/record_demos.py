@@ -374,7 +374,6 @@ def handle_reset(
         int: Reset success step count (0)
     """
     print("Resetting environment...")
-    env.sim.reset()
     env.recorder_manager.reset()
     env.reset()
     success_step_count = 0
@@ -436,7 +435,6 @@ def run_simulation_loop(
     teleop_interface.add_callback("R", reset_recording_instance)
 
     # Reset before starting
-    env.sim.reset()
     env.reset()
     teleop_interface.reset()
 

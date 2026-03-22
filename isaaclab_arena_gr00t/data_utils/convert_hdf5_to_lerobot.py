@@ -533,9 +533,17 @@ def convert_hdf5_to_lerobot(config: Gr00tDatasetConfig):
         if config.video_name_lerobot not in video_paths.keys():
             video_paths[config.video_name_lerobot] = new_video_path
 
-        assert config.pov_cam_name_sim in trajectory["camera_obs"]
+        # Camera data may be in "camera_obs/" (Arena) or "obs/" (built-in Isaac Lab)
+        if "camera_obs" in trajectory and config.pov_cam_name_sim in trajectory["camera_obs"]:
+            frames_src = trajectory["camera_obs"][config.pov_cam_name_sim]
+        elif "obs" in trajectory and config.pov_cam_name_sim in trajectory["obs"]:
+            frames_src = trajectory["obs"][config.pov_cam_name_sim]
+        else:
+            raise KeyError(
+                f"Camera '{config.pov_cam_name_sim}' not found in 'camera_obs/' or 'obs/' for {trajectory_id}"
+            )
 
-        frames = np.array(trajectory["camera_obs"][config.pov_cam_name_sim])
+        frames = np.array(frames_src)
         # remove last frame due to how Lab reports observations
         frames = frames[:-1]
         assert len(frames) == length

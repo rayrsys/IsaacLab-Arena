@@ -8,6 +8,13 @@ import importlib
 from typing import Any
 
 from isaaclab_arena.cli.isaaclab_arena_cli import get_isaaclab_arena_cli_parser
+from isaaclab_arena.examples.example_environments.g1_chess_environment import G1ChessBoardEnvironment
+from isaaclab_arena.examples.example_environments.g1_chess_piece_placement_environment import (
+    G1ChessPiecePlacementEnvironment,
+)
+from isaaclab_arena.examples.example_environments.g1_simple_pick_and_place_environment import (
+    G1SimplePickAndPlaceEnvironment,
+)
 from isaaclab_arena.examples.example_environments.galileo_g1_locomanip_pick_and_place_environment import (
     GalileoG1LocomanipPickAndPlaceEnvironment,
 )
@@ -34,6 +41,9 @@ ExampleEnvironments = {
     GalileoPickAndPlaceEnvironment.name: GalileoPickAndPlaceEnvironment,
     GalileoG1LocomanipPickAndPlaceEnvironment.name: GalileoG1LocomanipPickAndPlaceEnvironment,
     PressButtonEnvironment.name: PressButtonEnvironment,
+    G1ChessBoardEnvironment.name: G1ChessBoardEnvironment,
+    G1ChessPiecePlacementEnvironment.name: G1ChessPiecePlacementEnvironment,
+    G1SimplePickAndPlaceEnvironment.name: G1SimplePickAndPlaceEnvironment,
 }
 
 

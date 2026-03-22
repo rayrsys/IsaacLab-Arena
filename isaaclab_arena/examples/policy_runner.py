@@ -24,7 +24,7 @@ def main():
     with SimulationAppContext(args_cli):
         # Add policy-related arguments to the parser
         args_parser = setup_policy_argument_parser(args_parser)
-        args_cli = args_parser.parse_args()
+        args_cli, _ = args_parser.parse_known_args()
         # Build scene
         arena_builder = get_arena_builder_from_cli(args_cli)
         env = arena_builder.make_registered()

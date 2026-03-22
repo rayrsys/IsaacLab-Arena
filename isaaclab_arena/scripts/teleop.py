@@ -39,7 +39,7 @@ parser.add_argument(
 add_example_environments_cli_args(parser)
 
 # parse the arguments
-args_cli = parser.parse_args()
+args_cli, _ = parser.parse_known_args()
 
 app_launcher_args = vars(args_cli)
 
@@ -89,7 +89,8 @@ def main() -> None:
     env_name, env_cfg = arena_builder.build_registered()
     # modify configuration
     env_cfg.terminations.time_out = None
-    if "Lift" in args_cli.task:
+    task_name = getattr(args_cli, "task", "") or getattr(args_cli, "example_environment", "") or ""
+    if "Lift" in task_name:
         # set the resampling time range to large number to avoid resampling
         env_cfg.commands.object_pose.resampling_time_range = (1.0e9, 1.0e9)
         # add termination condition for reaching the goal otherwise the environment won't reset
@@ -105,7 +106,7 @@ def main() -> None:
         # create environment
         env = gym.make(env_name, cfg=env_cfg).unwrapped
         # check environment name (for reach , we don't allow the gripper)
-        if "Reach" in args_cli.task:
+        if "Reach" in task_name:
             omni.log.warn(
                 f"The environment '{args_cli.task}' does not support gripper control. The device command will be"
                 " ignored."

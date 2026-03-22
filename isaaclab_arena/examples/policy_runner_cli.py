@@ -101,7 +101,7 @@ def setup_policy_argument_parser(args_parser: argparse.ArgumentParser | None = N
     add_replay_arguments(args_parser)
     add_replay_lerobot_arguments(args_parser)
     add_gr00t_closedloop_arguments(args_parser)
-    parsed_args = args_parser.parse_args()
+    parsed_args, _ = args_parser.parse_known_args()
 
     if parsed_args.policy_type == "replay" and parsed_args.replay_file_path is None:
         raise ValueError("--replay_file_path is required when using --policy_type replay")
