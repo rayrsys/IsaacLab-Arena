@@ -1,0 +1,47 @@
+# Gr00tDatasetConfig for G1 chess — right-arm-only (14 DOF)
+# Converts HDF5 demos to LeRobot format with only right_arm + right_hand actions/state
+
+data_root: "/home/ray/datasets/chess"
+language_instruction: "Pick up the chess piece."
+task_index: 0
+hdf5_name: "chess_right_arm_v1.hdf5"
+
+# HDF5 datafield names
+state_name_sim: "robot_joint_pos"
+action_name_sim: "processed_actions"
+pov_cam_name_sim: "robot_head_cam_rgb"
+
+# Gr00t-LeRobot datafield names
+state_name_lerobot: "observation.state"
+action_name_lerobot: "action"
+video_name_lerobot: "observation.images.ego_view"
+task_description_lerobot: "annotation.human.task_description"
+
+# Parquet configuration
+chunks_size: 1000
+fps: 50
+
+# File path templates
+data_path: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet"
+video_path: "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4"
+
+# Configuration file paths — modality + policy joints are 14DOF, source configs unchanged
+modality_template_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/modality_right_arm_only.json"
+modality_fname: "modality.json"
+episodes_fname: "episodes.jsonl"
+tasks_fname: "tasks.jsonl"
+info_template_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/info.json"
+info_fname: "info.json"
+
+# Joint configs
+# policy_joints: grouped format for GR00T remapping (14DOF right arm+hand only)
+# action_joints: flat format matching HDF5 processed_actions column layout
+# state_joints: flat format matching HDF5 robot_joint_pos column layout
+policy_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/gr00t_14dof_right_arm_hand_joint_space.yaml"
+robot_type: "unitree_g1"
+action_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/14dof_right_arm_hand_joint_space.yaml"
+state_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/43dof_joint_space.yaml"
+
+# Image configuration
+original_image_size: [480, 640, 3]
+target_image_size: [480, 640, 3]

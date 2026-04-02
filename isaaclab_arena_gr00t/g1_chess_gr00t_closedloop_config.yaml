@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # GR00T closed-loop policy config for G1 chess piece placement task
-model_path: /home/ray/models/chess-v3-100demos-merged
-language_instruction: "Pick up the chess piece and place it on the green target square."
+model_path: /home/ray/models/chess-v7-merged
+language_instruction: "Pick up the chess piece."
 # Action horizon is the number of actions predicted by the policy per inference rollout
 action_horizon: 16
 embodiment_tag: new_embodiment

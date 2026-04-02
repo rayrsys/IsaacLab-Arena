@@ -525,29 +525,30 @@ def convert_hdf5_to_lerobot(config: Gr00tDatasetConfig):
             "tasks": [tasks[task_index] for task_index in df_ret_dict["annotation"]],
             "length": length,
         })
-        # 2.3. Generate videos/
-        new_video_relpath = config.video_path.format(
-            episode_chunk=episode_chunk, video_key=config.lerobot_keys["video"], episode_index=episode_index
-        )
-        new_video_path = config.lerobot_data_dir / new_video_relpath
-        if config.video_name_lerobot not in video_paths.keys():
-            video_paths[config.video_name_lerobot] = new_video_path
-
-        # Camera data may be in "camera_obs/" (Arena) or "obs/" (built-in Isaac Lab)
-        if "camera_obs" in trajectory and config.pov_cam_name_sim in trajectory["camera_obs"]:
-            frames_src = trajectory["camera_obs"][config.pov_cam_name_sim]
-        elif "obs" in trajectory and config.pov_cam_name_sim in trajectory["obs"]:
-            frames_src = trajectory["obs"][config.pov_cam_name_sim]
-        else:
-            raise KeyError(
-                f"Camera '{config.pov_cam_name_sim}' not found in 'camera_obs/' or 'obs/' for {trajectory_id}"
+        # 2.3. Generate videos/ (supports multiple cameras)
+        for cam_key, (cam_hdf5_name, cam_lerobot_name) in config.cameras.items():
+            new_video_relpath = config.video_path.format(
+                episode_chunk=episode_chunk, video_key=cam_lerobot_name, episode_index=episode_index
             )
+            new_video_path = config.lerobot_data_dir / new_video_relpath
+            if cam_lerobot_name not in video_paths.keys():
+                video_paths[cam_lerobot_name] = new_video_path
 
-        frames = np.array(frames_src)
-        # remove last frame due to how Lab reports observations
-        frames = frames[:-1]
-        assert len(frames) == length
-        queue.put((new_video_path, frames, config.fps, "image"))
+            # Camera data may be in "camera_obs/" (Arena) or "obs/" (built-in Isaac Lab)
+            if "camera_obs" in trajectory and cam_hdf5_name in trajectory["camera_obs"]:
+                frames_src = trajectory["camera_obs"][cam_hdf5_name]
+            elif "obs" in trajectory and cam_hdf5_name in trajectory["obs"]:
+                frames_src = trajectory["obs"][cam_hdf5_name]
+            else:
+                raise KeyError(
+                    f"Camera '{cam_hdf5_name}' not found in 'camera_obs/' or 'obs/' for {trajectory_id}"
+                )
+
+            frames = np.array(frames_src)
+            # remove last frame due to how Lab reports observations
+            frames = frames[:-1]
+            assert len(frames) == length
+            queue.put((new_video_path, frames, config.fps, "image"))
 
         if example_data is None:
             example_data = df_ret_dict

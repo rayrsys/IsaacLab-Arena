@@ -52,6 +52,16 @@ class Gr00tDatasetConfig:
     pov_cam_name_sim: str = field(
         default="robot_head_cam", metadata={"description": "Name of the POV camera in the HDF5 file."}
     )
+    # Multi-camera support: dict mapping camera_key -> HDF5 obs name
+    # If set, overrides pov_cam_name_sim / video_name_lerobot for multi-camera conversion
+    extra_cameras_sim: dict = field(
+        default_factory=dict,
+        metadata={"description": "Extra cameras: {key: hdf5_obs_name}. e.g. {'right_wrist': 'robot_right_wrist_cam_rgb'}"},
+    )
+    extra_cameras_lerobot: dict = field(
+        default_factory=dict,
+        metadata={"description": "Extra cameras: {key: lerobot_name}. e.g. {'right_wrist': 'observation.images.right_wrist'}"},
+    )
     # Gr00t-LeRobot datafield
     state_name_lerobot: str = field(
         default="observation.state", metadata={"description": "Name of the state in the LeRobot file."}
@@ -177,6 +187,13 @@ class Gr00tDatasetConfig:
             self.hdf5_keys["teleop_torso_orientation_rpy_command"] = self.teleop_torso_orientation_rpy_command_name_sim
         if self.action_eef_name_sim:
             self.hdf5_keys["action_eef_pose"] = self.action_eef_name_sim
+
+        # Build cameras mapping: {key: (hdf5_name, lerobot_name)}
+        # Primary camera is always included
+        self.cameras = {"ego": (self.pov_cam_name_sim, self.video_name_lerobot)}
+        for key in self.extra_cameras_sim:
+            if key in self.extra_cameras_lerobot:
+                self.cameras[key] = (self.extra_cameras_sim[key], self.extra_cameras_lerobot[key])
 
         # Prepare data keys for LeRobot file
         self.lerobot_keys = {

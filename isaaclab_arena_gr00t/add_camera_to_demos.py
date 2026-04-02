@@ -1,18 +1,19 @@
-"""Replay recorded demos and capture camera frames.
+"""Replay recorded demos and capture camera frames (multi-camera).
 
 Replays joint positions from HDF5 demos through the sim and saves
-camera RGB observations back into a new HDF5 file.
+camera RGB observations back into a new HDF5 file. Supports both
+head camera and right wrist camera.
 
 Usage:
     cd /home/ray/IsaacLab-Arena/submodules/IsaacLab
     conda activate lerobot-arena
-    python /home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/add_camera_to_demos.py \
-        --input_file /home/ray/datasets/chess/chess_demos_100.hdf5 \
-        --output_file /home/ray/datasets/chess/chess_demos_100_with_cam.hdf5
+    ./isaaclab.sh -p /home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/add_camera_to_demos.py \
+        --input_file /home/ray/datasets/chess_v3/chess_demos_v3.hdf5 \
+        --output_file /home/ray/datasets/chess_v3/chess_demos_v3_multicam.hdf5 \
+        --enable_cameras
 """
 
 import argparse
-import sys
 from pathlib import Path
 
 from isaaclab.app import AppLauncher
@@ -44,6 +45,13 @@ from isaaclab_tasks.manager_based.locomanipulation.pick_place.chess_g1_env_cfg i
 import isaaclab.envs.mdp as base_mdp
 
 
+# Camera definitions: (scene_key, hdf5_dataset_name)
+CAMERAS = [
+    ("robot_head_cam", "robot_head_cam_rgb"),
+    ("top_cam", "top_cam_rgb"),
+]
+
+
 @configclass
 class ReplayActionsCfg:
     joint_pos = base_mdp.JointPositionActionCfg(
@@ -72,12 +80,22 @@ class ReplayEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.render_interval = 2
 
 
+def capture_camera(env, scene_key):
+    """Capture RGB frame from a camera sensor."""
+    cam = env.scene[scene_key]
+    rgb = cam.data.output["rgb"][0, ..., :3].cpu().numpy()
+    if rgb.dtype != np.uint8:
+        rgb = (rgb * 255).clip(0, 255).astype(np.uint8)
+    return rgb
+
+
 def main():
     f_in = h5py.File(args.input_file, "r")
     f_out = h5py.File(args.output_file, "w")
 
     demos = sorted(f_in["data"].keys())
     print(f"Processing {len(demos)} demos from {args.input_file}")
+    print(f"Capturing cameras: {[name for _, name in CAMERAS]}")
 
     env_cfg = ReplayEnvCfg()
     env = ManagerBasedRLEnv(cfg=env_cfg)
@@ -89,15 +107,22 @@ def main():
         obj_pos_init = traj["obs"]["object_pos"][0]
         num_steps = len(joint_pos_seq)
 
-        # Copy all existing data
+        # Copy all existing data (recursively handle groups)
         grp = f_out.create_group(f"data/{demo_name}")
-        for key in traj.keys():
-            if key == "obs":
-                obs_grp = grp.create_group("obs")
-                for obs_key in traj["obs"].keys():
-                    obs_grp.create_dataset(obs_key, data=traj["obs"][obs_key][:])
-            else:
-                grp.create_dataset(key, data=traj[key][:])
+
+        def copy_group(src, dst, skip_cam=False):
+            for key in src.keys():
+                item = src[key]
+                if isinstance(item, h5py.Group):
+                    sub = dst.create_group(key)
+                    copy_group(item, sub, skip_cam=(key == "obs"))
+                elif isinstance(item, h5py.Dataset):
+                    # Skip old camera data in obs — we'll re-capture
+                    if skip_cam and "cam_rgb" in key:
+                        continue
+                    dst.create_dataset(key, data=item[:])
+
+        copy_group(traj, grp)
 
         # Copy attributes
         for attr_key, attr_val in traj.attrs.items():
@@ -113,21 +138,24 @@ def main():
         obj.write_root_pose_to_sim(obj_pose, env_ids=torch.tensor([0], device=device))
         obj.write_root_velocity_to_sim(torch.zeros(1, 6, device=device), env_ids=torch.tensor([0], device=device))
 
-        # Replay and capture camera
-        cam_frames = []
+        # Replay and capture all cameras
+        all_cam_frames = {hdf5_name: [] for _, hdf5_name in CAMERAS}
+
         for step in range(num_steps):
             jp = torch.tensor(joint_pos_seq[step], dtype=torch.float32, device=device).unsqueeze(0)
             env.step(jp)
 
-            cam = env.scene["robot_head_cam"]
-            rgb = cam.data.output["rgb"][0, ..., :3].cpu().numpy()
-            if rgb.dtype != np.uint8:
-                rgb = (rgb * 255).clip(0, 255).astype(np.uint8)
-            cam_frames.append(rgb)
+            for scene_key, hdf5_name in CAMERAS:
+                rgb = capture_camera(env, scene_key)
+                all_cam_frames[hdf5_name].append(rgb)
 
-        cam_frames = np.stack(cam_frames)
-        grp["obs"].create_dataset("robot_head_cam_rgb", data=cam_frames, compression="gzip", compression_opts=4)
-        print(f"  {demo_name}: {num_steps} steps, cam={cam_frames.shape}")
+        # Save all camera streams
+        for _, hdf5_name in CAMERAS:
+            frames = np.stack(all_cam_frames[hdf5_name])
+            grp["obs"].create_dataset(hdf5_name, data=frames, compression="gzip", compression_opts=4)
+
+        print(f"  {demo_name}: {num_steps} steps, "
+              + ", ".join(f"{name}={np.stack(all_cam_frames[name]).shape}" for _, name in CAMERAS))
 
     f_in.close()
     f_out.close()
