@@ -12,6 +12,9 @@ from isaaclab_arena.examples.example_environments.g1_chess_environment import G1
 from isaaclab_arena.examples.example_environments.g1_chess_piece_placement_environment import (
     G1ChessPiecePlacementEnvironment,
 )
+from isaaclab_arena.examples.example_environments.g1_chess_residual_rl_environment import (
+    G1ChessResidualRLEnvironment,
+)
 from isaaclab_arena.examples.example_environments.g1_simple_pick_and_place_environment import (
     G1SimplePickAndPlaceEnvironment,
 )
@@ -43,6 +46,7 @@ ExampleEnvironments = {
     PressButtonEnvironment.name: PressButtonEnvironment,
     G1ChessBoardEnvironment.name: G1ChessBoardEnvironment,
     G1ChessPiecePlacementEnvironment.name: G1ChessPiecePlacementEnvironment,
+    G1ChessResidualRLEnvironment.name: G1ChessResidualRLEnvironment,
     G1SimplePickAndPlaceEnvironment.name: G1SimplePickAndPlaceEnvironment,
 }
 

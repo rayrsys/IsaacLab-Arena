@@ -1,0 +1,48 @@
+# Gr00tDatasetConfig for G1 chess — target-token baseline (B2)
+# Identical to g1_chess_right_arm_config.yaml but the state vector is augmented
+# with a 3-D target-square xyz channel (state.target_xyz). Used to train the
+# GR00T-N1.7 fine-tune that gets target conditioning *without* a skeleton.
+# See PR description (claude/chess-rl-v2) for context.
+
+data_root: "/home/ray/datasets/chess"
+language_instruction: "Pick up the chess piece and place it on the green target square."
+task_index: 0
+hdf5_name: "chess_grid_v3.hdf5"
+
+# HDF5 datafield names — adds processed_target_xyz alongside the usual fields.
+state_name_sim: "robot_joint_pos"
+action_name_sim: "processed_actions"
+pov_cam_name_sim: "robot_head_cam_rgb"
+target_xyz_name_sim: "processed_target_xyz"  # NEW: (T, 3) per demo, written at record time
+
+# Gr00t-LeRobot datafield names
+state_name_lerobot: "observation.state"
+action_name_lerobot: "action"
+video_name_lerobot: "observation.images.ego_view"
+task_description_lerobot: "annotation.human.task_description"
+target_xyz_name_lerobot: "observation.target_xyz"
+
+# Parquet configuration
+chunks_size: 1000
+fps: 50
+
+# File path templates
+data_path: "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet"
+video_path: "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4"
+
+# Configuration file paths
+modality_template_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/modality_right_arm_with_target.json"
+modality_fname: "modality.json"
+episodes_fname: "episodes.jsonl"
+tasks_fname: "tasks.jsonl"
+info_template_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/info.json"
+info_fname: "info.json"
+
+# Joint configs — same 14-DOF right-arm space as the right-arm pipeline.
+policy_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/gr00t_14dof_right_arm_hand_joint_space.yaml"
+robot_type: "unitree_g1"
+action_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/14dof_right_arm_hand_joint_space.yaml"
+state_joints_config_path: "/home/ray/IsaacLab-Arena/isaaclab_arena_gr00t/config/g1/43dof_joint_space.yaml"
+
+original_image_size: [480, 640, 3]
+target_image_size: [480, 640, 3]

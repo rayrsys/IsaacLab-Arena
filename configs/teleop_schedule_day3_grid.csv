@@ -1,0 +1,17 @@
+source_square,target_square,n_demos
+a2,b6,6
+a2,c7,6
+a2,h6,6
+a2,a8,6
+c2,b6,6
+c2,c7,6
+c2,h6,6
+c2,a8,6
+e7,b6,6
+e7,c7,6
+e7,h6,6
+e7,a8,6
+h7,b6,6
+h7,c7,6
+h7,h6,6
+h7,a8,6
